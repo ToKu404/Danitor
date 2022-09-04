@@ -1,39 +1,47 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:danitor/domain/entities/animal_detail.dart';
 import 'package:danitor/domain/entities/bounding_box.dart';
 import 'package:danitor/domain/entities/detection.dart';
-import 'package:danitor/domain/entities/object_detected.dart';
 import 'package:danitor/presentations/providers/danitor_notifier.dart';
 import 'package:danitor/presentations/providers/detail_provider_notifier.dart';
 import 'package:danitor/presentations/providers/detection_result_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../core/themes/color_const.dart';
 
-class ResultDetectionPage extends StatefulWidget {
+class HelperSection {
   final File fileImage;
-  const ResultDetectionPage({Key? key, required this.fileImage})
-      : super(key: key);
+  final List<int> filters;
+
+  HelperSection({required this.fileImage, required this.filters});
+}
+
+class ResultDetectionPage extends StatefulWidget {
+  final HelperSection helper;
+  const ResultDetectionPage({Key? key, required this.helper}) : super(key: key);
 
   @override
   State<ResultDetectionPage> createState() => ResultDetectionPageState();
 }
 
 class ResultDetectionPageState extends State<ResultDetectionPage> {
-  late double imageWidth;
-  late double imageHeight;
+  double imageWidth = 0;
+  double imageHeight = 0;
   @override
   void initState() {
     Future.microtask(() {
-      Provider.of<DanitorNotifier>(context, listen: false)
-          .startDetection(base64Encode(widget.fileImage.readAsBytesSync()));
+      Provider.of<DanitorNotifier>(context, listen: false).startDetection(
+          base64Encode(widget.helper.fileImage.readAsBytesSync()),
+          widget.helper.filters);
+      Provider.of<DetectionResultHelper>(context, listen: false)
+          .changeResultIndex(0);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _asyncMethod();
@@ -44,15 +52,21 @@ class ResultDetectionPageState extends State<ResultDetectionPage> {
 
   void _asyncMethod() async {
     var decodedImage =
-        await decodeImageFromList(widget.fileImage.readAsBytesSync());
-    // ignore: use_build_context_synchronously
+        await decodeImageFromList(widget.helper.fileImage.readAsBytesSync());
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     imageWidth = decodedImage.width.toDouble();
     imageHeight = decodedImage.height.toDouble();
 
     imageHeight = screenWidth * imageHeight / imageWidth;
     imageWidth = screenWidth;
+
+    if (imageHeight > (screenHeight - 130)) {
+      double temp = imageHeight;
+      imageHeight = screenHeight - 180;
+      imageWidth = imageHeight * imageWidth / temp;
+    }
   }
 
   @override
@@ -93,7 +107,10 @@ class ResultDetectionPageState extends State<ResultDetectionPage> {
                         height: 16,
                       ),
                       InkWell(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () {
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
+                        },
                         child: Container(
                           width: 250,
                           padding: const EdgeInsets.all(8.0),
@@ -126,7 +143,7 @@ class ResultDetectionPageState extends State<ResultDetectionPage> {
               imageWidth: imageWidth,
               imageHeight: imageHeight,
               detection: data.detecetion,
-              fileImage: widget.fileImage,
+              fileImage: widget.helper.fileImage,
             );
           } else {
             return const Center();
@@ -208,7 +225,10 @@ class _BuildDetailBodyState extends State<BuildDetailBody> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
+                      },
                       icon: Icon(
                         Icons.home,
                         color: kWhite,
@@ -221,46 +241,43 @@ class _BuildDetailBodyState extends State<BuildDetailBody> {
                 child: Stack(
                   children: [
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: Container(
                             color: kGreySoft,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Container(
-                                  width: widget.imageWidth,
-                                  height: widget.imageHeight,
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: FileImage(
-                                        widget.fileImage,
+                                Center(
+                                  child: Container(
+                                    width: widget.imageWidth,
+                                    height: widget.imageHeight,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: FileImage(
+                                          widget.fileImage,
+                                        ),
                                       ),
                                     ),
+                                    child: Builder(builder: (context) {
+                                      return BuildBoundingBox(
+                                        imageHeight: widget.imageHeight,
+                                        imageWidth: widget.imageWidth,
+                                        boundingBox: widget
+                                            .detection
+                                            .objectDetected[currentIndex]
+                                            .boundingBox,
+                                        confidence: widget
+                                            .detection
+                                            .objectDetected[currentIndex]
+                                            .confidence,
+                                        colorBounderies: colorDanger[
+                                            int.parse(detail.isDangerousId)],
+                                      );
+                                    }),
                                   ),
-                                  child: Builder(builder: (context) {
-                                    List<Color> colorDanger = [
-                                      Colors.green,
-                                      Colors.red,
-                                      Colors.orange,
-                                      kWarning,
-                                      Colors.brown,
-                                    ];
-                                    return BuildBoundingBox(
-                                      imageHeight: widget.imageHeight,
-                                      imageWidth: widget.imageWidth,
-                                      boundingBox: widget
-                                          .detection
-                                          .objectDetected[currentIndex]
-                                          .boundingBox,
-                                      confidence: widget
-                                          .detection
-                                          .objectDetected[currentIndex]
-                                          .confidence,
-                                      colorBounderies: colorDanger[
-                                          int.parse(detail.isDangerousId)],
-                                    );
-                                  }),
                                 ),
                               ],
                             ),
@@ -361,7 +378,7 @@ class BuildDetail extends StatelessWidget {
     int currentIndex = provider.resultIndex;
     return DraggableScrollableSheet(
       initialChildSize: 0.30,
-      minChildSize: 0.12,
+      minChildSize: 0.11,
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           padding: const EdgeInsets.all(16),
@@ -467,13 +484,6 @@ class BuildDetail extends StatelessWidget {
                 ),
                 const BuildTitle(title: 'Ancaman'),
                 Builder(builder: (context) {
-                  List<Color> colorDanger = [
-                    Colors.green,
-                    Colors.red,
-                    Colors.orange,
-                    kWarning,
-                    Colors.brown,
-                  ];
                   return Text(
                     animalDetail.isDangerousLabel,
                     style: GoogleFonts.poppins(
@@ -490,18 +500,13 @@ class BuildDetail extends StatelessWidget {
                 ),
                 const BuildTitle(title: 'Racun'),
                 Builder(builder: (context) {
-                  List<Color> colorDanger = [
-                    Colors.blueAccent,
-                    Colors.orangeAccent,
-                    kPoison,
-                  ];
                   return Text(
                     animalDetail.isPoisonousLabel,
                     style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color:
-                            colorDanger[int.parse(animalDetail.isPoisonousId)]),
+                            colorPoison[int.parse(animalDetail.isPoisonousId)]),
                   );
                 }),
                 Text(animalDetail.isPoisonousDescription,

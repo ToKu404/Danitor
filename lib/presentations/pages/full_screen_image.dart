@@ -1,14 +1,15 @@
-import 'dart:io';
 import 'dart:ui';
 import 'package:danitor/core/routes/route_names.dart';
 import 'package:danitor/core/themes/color_const.dart';
+import 'package:danitor/presentations/pages/result_detection_page.dart';
+import 'package:danitor/presentations/providers/get_info_location_notifier.dart';
+import 'package:danitor/presentations/providers/target_image_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class FullScreenImagePage extends StatefulWidget {
-  final File fileImage;
-  const FullScreenImagePage({Key? key, required this.fileImage})
-      : super(key: key);
+  const FullScreenImagePage({Key? key}) : super(key: key);
 
   @override
   State<FullScreenImagePage> createState() => _FullScreenImagePageState();
@@ -17,6 +18,9 @@ class FullScreenImagePage extends StatefulWidget {
 class _FullScreenImagePageState extends State<FullScreenImagePage> {
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<TargetImageNotifier>();
+    final filterData = context.watch<GetInfoLocationNotifier>();
+
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -26,7 +30,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
               height: MediaQuery.of(context).size.height,
               decoration: BoxDecoration(
                   image: DecorationImage(
-                image: FileImage(widget.fileImage),
+                image: FileImage(provider.image!),
                 fit: BoxFit.cover,
               )),
               child: BackdropFilter(
@@ -43,7 +47,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
               child: Container(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: FileImage(widget.fileImage),
+                    image: FileImage(provider.image!),
                   ),
                 ),
               ),
@@ -53,10 +57,16 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
               left: (MediaQuery.of(context).size.width - 200) / 2,
               child: InkWell(
                 onTap: () async {
+                  print(filterData);
+                  List<int> filters = [];
+                  filterData.locationResult.animals.forEach((element) {
+                    filters.add(int.parse(element));
+                  });
                   Navigator.pushReplacementNamed(
                     context,
                     RESULT_DETECTION_ROUTE_NAME,
-                    arguments: widget.fileImage,
+                    arguments: HelperSection(
+                        fileImage: provider.image!, filters: filters),
                   );
                 },
                 child: Container(
@@ -105,22 +115,52 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
             ),
             Positioned(
               top: 18,
-              left: 18,
-              child: InkWell(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: kGreyDark,
-                    border: Border.all(width: 1, color: kWhite),
-                  ),
-                  child: Center(
-                      child: Icon(
-                    Icons.close,
-                    color: kWhite,
-                  )),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: kGreyDark,
+                          border: Border.all(width: 1, color: kWhite),
+                        ),
+                        child: Center(
+                            child: Icon(
+                          Icons.close,
+                          color: kWhite,
+                        )),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        provider.cropImage();
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: kGreyDark,
+                          border: Border.all(width: 1, color: kWhite),
+                        ),
+                        child: Center(
+                            child: Icon(
+                          Icons.crop,
+                          color: kWhite,
+                        )),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

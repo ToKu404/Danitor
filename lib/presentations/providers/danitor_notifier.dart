@@ -17,10 +17,10 @@ class DanitorNotifier extends ChangeNotifier {
   String _message = '';
   String get message => _message;
 
-  Future<void> startDetection(String image) async {
+  Future<void> startDetection(String image, List<int> filters) async {
     _detectionState = RequestState.loading;
     notifyListeners();
-    final result = await detectionUsecase.execute(image);
+    final result = await detectionUsecase.execute(image, filters);
     result.fold((failure) {
       _detectionState = RequestState.error;
       _message = failure.message;

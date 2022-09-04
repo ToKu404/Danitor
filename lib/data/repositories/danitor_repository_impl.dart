@@ -3,6 +3,7 @@ import 'package:danitor/core/common/exception.dart';
 import 'package:danitor/data/data_sources/danitor_datasource.dart';
 import 'package:danitor/domain/entities/detail_animals.dart';
 import 'package:danitor/domain/entities/detection.dart';
+import 'package:danitor/domain/entities/location_entity.dart';
 import 'package:danitor/domain/repositories/danitor_repository.dart';
 import 'package:dartz/dartz.dart';
 
@@ -16,9 +17,9 @@ class DanitorRepositoryImpl implements DanitorRepository {
   });
 
   @override
-  Future<Either<Failure, Detection>> getDetectionResult(String image) async {
+  Future<Either<Failure, Detection>> getDetectionResult(String image, List<int> filters) async {
     try {
-      final result = await danitorDataSource.getDetectionResult(image);
+      final result = await danitorDataSource.getDetectionResult(image, filters);
       return Right(result.toEntity());
     } on ServerException {
       return const Left(ServerFailure(''));
@@ -31,6 +32,18 @@ class DanitorRepositoryImpl implements DanitorRepository {
   Future<Either<Failure, DetailAnimals>> getDetailAnimal(String idx) async {
     try {
       final result = await danitorDataSource.getDetailAnimal(idx);
+      return Right(result.toEntity());
+    } on ServerException {
+      return const Left(ServerFailure(''));
+    } on SocketException {
+      return const Left(ConnectionFailure('Failed to connect to the network'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, LocationEntity>> getAnimalLocation(String id) async{
+    try {
+      final result = await danitorDataSource.getAnimalLocation(id);
       return Right(result.toEntity());
     } on ServerException {
       return const Left(ServerFailure(''));

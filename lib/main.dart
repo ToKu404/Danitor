@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:danitor/core/routes/route_names.dart';
 import 'package:danitor/core/common/observer.dart';
 import 'package:danitor/presentations/pages/home_page.dart';
 import 'package:danitor/presentations/pages/result_detection_page.dart';
+import 'package:danitor/presentations/pages/select_destionation_page.dart';
 import 'package:danitor/presentations/pages/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +12,8 @@ import 'presentations/pages/full_screen_image.dart';
 import 'presentations/providers/danitor_notifier.dart';
 import 'presentations/providers/detail_provider_notifier.dart';
 import 'presentations/providers/detection_result_helper.dart';
-import 'presentations/providers/navbar_ notifier.dart';
+import 'presentations/providers/get_info_location_notifier.dart';
+import 'presentations/providers/select_location_handler.dart';
 import 'presentations/providers/target_image_notifier.dart';
 
 Future<void> main() async {
@@ -33,9 +34,6 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => di.locator<NavbarNotifier>(),
-        ),
-        ChangeNotifierProvider(
           create: (_) => di.locator<TargetImageNotifier>(),
         ),
         ChangeNotifierProvider(
@@ -46,6 +44,12 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => di.locator<DetailProviderNotifier>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.locator<SelectLocationHandler>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.locator<GetInfoLocationNotifier>(),
         )
       ],
       child: MaterialApp(
@@ -58,18 +62,25 @@ class MyApp extends StatelessWidget {
             case SPLASH_ROUTE_NAME:
               return MaterialPageRoute(
                   builder: (context) => const SplashScreen());
-            case HOME_ROUTE_NAME:
-              return MaterialPageRoute(builder: (context) => const HomePage());
-            case FULL_SCREEN_IMAGE_ROUTE_NAME:
-              final image = settings.arguments as File;
+            case DESTINATION_ROUTE_NAME:
+              final isInit = settings.arguments as bool;
               return MaterialPageRoute(
-                  builder: (context) => FullScreenImagePage(
-                        fileImage: image,
+                  builder: (context) => SelectDestinationPage(
+                        isInit: isInit,
                       ));
-            case RESULT_DETECTION_ROUTE_NAME:
-              final image = settings.arguments as File;
+            case HOME_ROUTE_NAME:
+              final id = settings.arguments as int;
               return MaterialPageRoute(
-                builder: (context) => ResultDetectionPage(fileImage: image),
+                  builder: (context) => HomePage(
+                        id: id,
+                      ));
+            case FULL_SCREEN_IMAGE_ROUTE_NAME:
+              return MaterialPageRoute(
+                  builder: (context) => const FullScreenImagePage());
+            case RESULT_DETECTION_ROUTE_NAME:
+              final helper = settings.arguments as HelperSection;
+              return MaterialPageRoute(
+                builder: (context) => ResultDetectionPage(helper: helper),
               );
           }
         },

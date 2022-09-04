@@ -8,7 +8,7 @@ class DetectionUsecase {
 
   DetectionUsecase({required this.repository});
 
-  Future<Either<Failure, Detection>> execute(String image) {
-    return repository.getDetectionResult(image);
+  Future<Either<Failure, Detection>> execute(String image, List<int> filters) {
+    return repository.getDetectionResult(image, filters);
   }
 }

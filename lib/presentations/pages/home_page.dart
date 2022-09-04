@@ -1,5 +1,7 @@
 import 'package:danitor/core/routes/route_names.dart';
 import 'package:danitor/core/themes/color_const.dart';
+import 'package:danitor/presentations/providers/get_info_location_notifier.dart';
+import 'package:danitor/presentations/providers/select_location_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,13 +10,27 @@ import 'package:provider/provider.dart';
 import '../providers/target_image_notifier.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final int id;
+  const HomePage({Key? key, required this.id}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    Future.microtask(() {
+      Provider.of<SelectLocationHandler>(context, listen: false)
+          .initId(widget.id);
+      if (widget.id != -1) {
+        Provider.of<GetInfoLocationNotifier>(context, listen: false)
+            .getInfoLocation(widget.id);
+      }
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isPicked = false;
@@ -37,24 +53,58 @@ class _HomePageState extends State<HomePage> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
+                child: Column(
                   children: [
-                    SvgPicture.asset(
-                      'assets/logo.svg',
-                      height: 24,
-                      width: 24,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/logo.svg',
+                          height: 24,
+                          width: 24,
+                        ),
+                        const SizedBox(
+                          width: 4,
+                        ),
+                        Text(
+                          'Danitor',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                            color: kWhite,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(
-                      width: 4,
-                    ),
-                    Text(
-                      'Danitor',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: kWhite,
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, DESTINATION_ROUTE_NAME,arguments: false);
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.location_on_rounded,
+                            size: 13,
+                            color: kGreen,
+                          ),
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          Builder(builder: (context) {
+                            final provider =
+                                context.watch<SelectLocationHandler>();
+                            final name = provider.locationName;
+                            return Text(
+                              name,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: kWhite,
+                              ),
+                            );
+                          })
+                        ],
                       ),
                     ),
                   ],
