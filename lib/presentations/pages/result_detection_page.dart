@@ -396,7 +396,7 @@ class BuildDetail extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    currentIndex > 1
+                    currentIndex > 0
                         ? InkWell(
                             onTap: () {
                               currentIndex--;

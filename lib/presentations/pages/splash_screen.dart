@@ -26,6 +26,8 @@ class _SplashScreenState extends State<SplashScreen> {
     String routeName = HOME_ROUTE_NAME;
     final prefs = await SharedPreferences.getInstance();
     numInit = prefs.getInt('init') ?? -2;
+    print(numInit);
+
     if (numInit == -2) {
       routeName = DESTINATION_ROUTE_NAME;
     }

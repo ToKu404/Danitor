@@ -57,11 +57,10 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
               left: (MediaQuery.of(context).size.width - 200) / 2,
               child: InkWell(
                 onTap: () async {
-                  print(filterData);
                   List<int> filters = [];
-                  filterData.locationResult.animals.forEach((element) {
+                  for (var element in filterData.locationResult) {
                     filters.add(int.parse(element));
-                  });
+                  }
                   Navigator.pushReplacementNamed(
                     context,
                     RESULT_DETECTION_ROUTE_NAME,

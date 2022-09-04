@@ -9,8 +9,7 @@ import 'package:danitor/data/models/detection_model.dart';
 import '../../core/common/exception.dart';
 
 abstract class DanitorDataSource {
-  Future<DetectionResponse> getDetectionResult(
-      String image, List<int> filters);
+  Future<DetectionResponse> getDetectionResult(String image, List<int> filters);
   Future<DetailAnimalsResponse> getDetailAnimal(String idx);
   Future<LocationResponse> getAnimalLocation(String id);
 }

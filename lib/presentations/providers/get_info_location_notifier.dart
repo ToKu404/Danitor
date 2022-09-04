@@ -10,8 +10,8 @@ class GetInfoLocationNotifier extends ChangeNotifier {
 
   GetInfoLocationNotifier({required this.usecase});
 
-  late LocationResult _locationResult;
-  LocationResult get locationResult => _locationResult;
+  List<String> _locationResult = [];
+  List<String> get locationResult => _locationResult;
 
   RequestState _locationState = RequestState.init;
   RequestState get locationState => _locationState;
@@ -29,7 +29,7 @@ class GetInfoLocationNotifier extends ChangeNotifier {
       notifyListeners();
     }, (detectionResult) {
       _locationState = RequestState.success;
-      _locationResult = detectionResult.result;
+      _locationResult = detectionResult.result.animals;
       notifyListeners();
     });
   }
