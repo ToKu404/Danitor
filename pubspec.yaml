@@ -20,6 +20,10 @@ dependencies:
   flutter_svg: ^1.1.4
   font_awesome_flutter: ^10.1.0
   image_picker: ^0.8.5+3
+  dartz: ^0.10.0-nullsafety.2
+  equatable: ^2.0.5
+  http: ^0.13.3
+  url_launcher: ^6.1.5
 
 dev_dependencies:
   flutter_test:

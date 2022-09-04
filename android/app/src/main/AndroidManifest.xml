@@ -2,6 +2,7 @@
     package="com.example.danitor">
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
    <application
         android:label="danitor"
         android:name="${applicationName}"
