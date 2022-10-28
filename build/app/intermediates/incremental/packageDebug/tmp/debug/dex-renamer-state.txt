@@ -1,0 +1,4 @@
+#Sat Oct 29 01:45:25 WITA 2022
+base.0=/home/toku/Documents/Danitor/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

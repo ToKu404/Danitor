@@ -1,9 +1,12 @@
 import 'package:danitor/core/routes/route_names.dart';
 import 'package:danitor/core/themes/color_const.dart';
+import 'package:danitor/core/common/auth_helper.dart';
+import 'package:danitor/presentations/providers/auth_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,30 +16,41 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  late int numInit;
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkInit();
-    });
-  }
-
-  _checkInit() async {
-    String routeName = HOME_ROUTE_NAME;
-    final prefs = await SharedPreferences.getInstance();
-    numInit = prefs.getInt('init') ?? -2;
-    print(numInit);
-
-    if (numInit == -2) {
-      routeName = DESTINATION_ROUTE_NAME;
-    }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Provider.of<AuthNotifier>(context)..checkLoginStatus();
     Future.delayed(
       const Duration(seconds: 3),
       () => Navigator.pushNamedAndRemoveUntil(
-          context, routeName, (route) => false,
-          arguments: routeName == DESTINATION_ROUTE_NAME ? true : numInit),
+        context,
+        WRAPPER_ROUTE_NAME,
+        (route) => false,
+      ),
     );
+    // SchedulerBinding.instance.addPostFrameCallback((_) {
+    //   final provider = context.read<AuthNotifier>();
+    //   provider.checkLoginStatus();
+    //   if (provider.isLogin || provider.isAnonymous) {
+    //     Future.delayed(
+    //       const Duration(seconds: 3),
+    //       () => Navigator.pushNamedAndRemoveUntil(
+    //         context,
+    //         MAIN_ROUTE_NAME,
+    //         (route) => false,
+    //       ),
+    //     );
+    //   } else {
+    //     Future.delayed(
+    //       const Duration(seconds: 3),
+    //       () => Navigator.pushNamedAndRemoveUntil(
+    //         context,
+    //         LOGIN_ROUTE_NAME,
+    //         (route) => false,
+    //       ),
+    //     );
+    //   }
+    // });
   }
 
   @override

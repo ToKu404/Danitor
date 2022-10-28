@@ -142,7 +142,7 @@ class _SelectDestinationPageState extends State<SelectDestinationPage> {
                         onTap: () async {
                           provider.setIdLocation(controller.text);
                           Navigator.pushNamedAndRemoveUntil(
-                              context, HOME_ROUTE_NAME, (route) => false,
+                              context, WRAPPER_ROUTE_NAME, (route) => false,
                               arguments: provider.idLocation);
                         },
                         child: Container(

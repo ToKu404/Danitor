@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:danitor/core/routes/route_names.dart';
 import 'package:danitor/domain/entities/animal_detail.dart';
 import 'package:danitor/domain/entities/bounding_box.dart';
 import 'package:danitor/domain/entities/detection.dart';
@@ -220,9 +221,10 @@ class _BuildDetailBodyState extends State<BuildDetailBody> {
               Container(
                 height: 65,
                 width: MediaQuery.of(context).size.width,
+                padding: EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(color: kGreyDark),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
                       onPressed: () {
@@ -230,7 +232,14 @@ class _BuildDetailBodyState extends State<BuildDetailBody> {
                             .popUntil((route) => route.isFirst);
                       },
                       icon: Icon(
-                        Icons.home,
+                        Icons.close_rounded,
+                        color: kWhite,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.share,
                         color: kWhite,
                       ),
                     ),
@@ -283,15 +292,19 @@ class _BuildDetailBodyState extends State<BuildDetailBody> {
                             ),
                           ),
                         ),
-                        const SizedBox(
+                        SizedBox(
                           height: 65,
                         ),
                       ],
                     ),
-                    BuildDetail(
-                      resultLength: widget.detection.objectDetected.length,
-                      animalDetail: detail,
-                      // animalDetail: detail,
+                    Positioned(
+                      bottom: 12,
+                      child: BuildDetail(
+                        resultLength: widget.detection.objectDetected.length,
+                        animalDetail: detail,
+                        detection: widget.detection,
+                        // animalDetail: detail,
+                      ),
                     ),
                   ],
                 ),
@@ -366,8 +379,10 @@ class BuildBoundingBox extends StatelessWidget {
 class BuildDetail extends StatelessWidget {
   final int resultLength;
   final AnimalDetail animalDetail;
+  final Detection detection;
   const BuildDetail({
     super.key,
+    required this.detection,
     required this.resultLength,
     required this.animalDetail,
   });
@@ -375,178 +390,105 @@ class BuildDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<DetectionResultHelper>();
-    int currentIndex = provider.resultIndex;
-    return DraggableScrollableSheet(
-      initialChildSize: 0.30,
-      minChildSize: 0.11,
-      builder: (BuildContext context, ScrollController scrollController) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-            color: kWhite,
-          ),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    currentIndex > 0
-                        ? InkWell(
-                            onTap: () {
-                              currentIndex--;
-                              provider.changeResultIndex(currentIndex);
-                            },
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: kWhite,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.arrow_back_rounded),
-                            ),
-                          )
-                        : const SizedBox(
-                            width: 32,
-                            height: 32,
-                          ),
-                    const SizedBox(
-                      width: 4,
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      child: PageView.builder(
+        itemCount: resultLength,
+        reverse: true,
+        scrollDirection: Axis.horizontal,
+        onPageChanged: (index) {
+          provider.changeResultIndex(index);
+        },
+        itemBuilder: (context, index) {
+          final detect = detection.objectDetected[index];
+          return InkWell(
+            onTap: () {
+              Navigator.pushNamed(context, ANIMAL_DETAIL_ROUTE_NAME,
+                  arguments: animalDetail);
+            },
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 10),
+              width: 100,
+              height: 75,
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                border:
+                    Border.all(width: 1, color: Colors.grey.withOpacity(.7)),
+                color: kWhite,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 60,
+                    width: 60,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12), color: kGreen),
+                    child: Center(
+                      child: Text(
+                        '${(detect.confidence * 100).toStringAsFixed(1)}%',
+                        style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            color: kWhite,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: kWhite,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Hasil Deteksi',
-                          textAlign: TextAlign.center,
+                  ),
+                  SizedBox(
+                    width: 8,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          animalDetail.name,
                           style: GoogleFonts.poppins(
-                            fontSize: 16,
+                            fontSize: 15,
+                            height: 1.5,
                             color: kGreyDark,
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 4,
-                    ),
-                    currentIndex < resultLength - 1
-                        ? InkWell(
-                            onTap: (() {
-                              currentIndex++;
-                              provider.changeResultIndex(currentIndex);
-                            }),
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: kWhite,
-                                borderRadius: BorderRadius.circular(8),
+                        Row(
+                          children: [
+                            Text(
+                              '${animalDetail.isDangerousLabel}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                color: colorDanger[
+                                    int.parse(animalDetail.isDangerousId)],
+                                height: 1.5,
+                                fontWeight: FontWeight.bold,
                               ),
-                              child: const Icon(Icons.arrow_forward_rounded),
                             ),
-                          )
-                        : const SizedBox(
-                            width: 32,
-                            height: 32,
-                          ),
-                  ],
-                ),
-                const Divider(),
-                const SizedBox(
-                  height: 4,
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width - (16 * 2),
-                  child: Text(
-                    animalDetail.name,
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      height: 1,
-                      fontWeight: FontWeight.bold,
-                      color: kGreen,
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              '${animalDetail.isPoisonousLabel}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                color: colorPoison[
+                                    int.parse(animalDetail.isPoisonousId)],
+                                height: 1,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
                     ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                const BuildTitle(title: 'Ancaman'),
-                Builder(builder: (context) {
-                  return Text(
-                    animalDetail.isDangerousLabel,
-                    style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color:
-                            colorDanger[int.parse(animalDetail.isDangerousId)]),
-                  );
-                }),
-                Text(animalDetail.isDangerousDescription,
-                    style: GoogleFonts.montserrat()),
-                const SizedBox(
-                  height: 8,
-                ),
-                const BuildTitle(title: 'Racun'),
-                Builder(builder: (context) {
-                  return Text(
-                    animalDetail.isPoisonousLabel,
-                    style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color:
-                            colorPoison[int.parse(animalDetail.isPoisonousId)]),
-                  );
-                }),
-                Text(animalDetail.isPoisonousDescription,
-                    style: GoogleFonts.montserrat()),
-                const SizedBox(
-                  height: 8,
-                ),
-                const BuildTitle(title: 'Detail'),
-                Text(animalDetail.animalDescription,
-                    style: GoogleFonts.montserrat()),
-                const SizedBox(
-                  height: 8,
-                ),
-                const BuildTitle(title: 'Sumber Informasi'),
-                Text(
-                    animalDetail.informationSource.substring(
-                        1, animalDetail.informationSource.length - 1),
-                    style: GoogleFonts.montserrat()),
-                const SizedBox(
-                  height: 2,
-                ),
-                InkWell(
-                  onTap: () async {
-                    final String url = animalDetail.webviewLink;
-                    if (await canLaunchUrlString(url)) {
-                      await launchUrlString(url);
-                    } else {
-                      throw "Could not launch $url";
-                    }
-                  },
-                  child: Text(
-                    'Telusuri Detail',
-                    style: GoogleFonts.poppins(color: Colors.blue),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

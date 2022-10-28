@@ -1,5 +1,3 @@
-import 'package:danitor/domain/entities/location_entity.dart';
-import 'package:danitor/domain/entities/location_result.dart';
 import 'package:danitor/domain/usecases/detail_location_usecase.dart';
 import 'package:flutter/material.dart';
 

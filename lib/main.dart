@@ -1,9 +1,17 @@
 import 'package:danitor/core/routes/route_names.dart';
 import 'package:danitor/core/common/observer.dart';
-import 'package:danitor/presentations/pages/home_page.dart';
+import 'package:danitor/domain/entities/animal_detail.dart';
+import 'package:danitor/presentations/pages/animal_detail_page.dart';
+import 'package:danitor/presentations/pages/main_page.dart';
+import 'package:danitor/presentations/pages/login_page.dart';
+import 'package:danitor/presentations/pages/register_page.dart';
 import 'package:danitor/presentations/pages/result_detection_page.dart';
 import 'package:danitor/presentations/pages/select_destionation_page.dart';
 import 'package:danitor/presentations/pages/splash_screen.dart';
+import 'package:danitor/presentations/pages/wrapper_page.dart';
+import 'package:danitor/presentations/providers/auth_notifier.dart';
+import 'package:danitor/presentations/providers/login_notifier.dart';
+import 'package:danitor/presentations/providers/register_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -50,6 +58,15 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => di.locator<GetInfoLocationNotifier>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.locator<LoginNotifier>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.locator<RegisterNotifier>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.locator<AuthNotifier>(),
         )
       ],
       child: MaterialApp(
@@ -62,18 +79,25 @@ class MyApp extends StatelessWidget {
             case SPLASH_ROUTE_NAME:
               return MaterialPageRoute(
                   builder: (context) => const SplashScreen());
+            case LOGIN_ROUTE_NAME:
+              return MaterialPageRoute(builder: (context) => const LoginPage());
+            case REGISTER_ROUTE_NAME:
+              return MaterialPageRoute(
+                  builder: (context) => const RegisterPage());
             case DESTINATION_ROUTE_NAME:
               final isInit = settings.arguments as bool;
               return MaterialPageRoute(
                   builder: (context) => SelectDestinationPage(
                         isInit: isInit,
                       ));
-            case HOME_ROUTE_NAME:
-              final id = settings.arguments as int;
+            case MAIN_ROUTE_NAME:
               return MaterialPageRoute(
-                  builder: (context) => HomePage(
-                        id: id,
-                      ));
+                builder: (context) => MainPage(),
+              );
+            case WRAPPER_ROUTE_NAME:
+              return MaterialPageRoute(
+                builder: (context) => WrapperPage(),
+              );
             case FULL_SCREEN_IMAGE_ROUTE_NAME:
               return MaterialPageRoute(
                   builder: (context) => const FullScreenImagePage());
@@ -81,6 +105,12 @@ class MyApp extends StatelessWidget {
               final helper = settings.arguments as HelperSection;
               return MaterialPageRoute(
                 builder: (context) => ResultDetectionPage(helper: helper),
+              );
+            case ANIMAL_DETAIL_ROUTE_NAME:
+              final animalDetail = settings.arguments as AnimalDetail;
+              return MaterialPageRoute(
+                builder: (context) =>
+                    AnimalDetailPage(animalDetail: animalDetail),
               );
           }
         },

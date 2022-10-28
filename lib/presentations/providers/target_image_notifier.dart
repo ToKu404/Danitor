@@ -11,7 +11,6 @@ class TargetImageNotifier extends ChangeNotifier {
 
   File? get image => _image;
 
-
   Future<void> onImageButtonPressed(ImageSource source,
       {BuildContext? context}) async {
     try {
