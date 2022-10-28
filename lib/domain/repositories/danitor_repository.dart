@@ -1,6 +1,8 @@
+import 'package:danitor/data/models/histories.dart';
 import 'package:danitor/data/models/token_response.dart';
 import 'package:danitor/domain/entities/detail_animals.dart';
 import 'package:danitor/domain/entities/location_entity.dart';
+import 'package:danitor/domain/entities/user_entity.dart';
 import 'package:dartz/dartz.dart';
 import '../../core/common/failure.dart';
 import '../entities/detection.dart';
@@ -15,4 +17,7 @@ abstract class DanitorRepository {
       String username, String name, String password);
   Future<Either<Failure, bool>> logout();
   Future<Either<Failure, bool>> isLogin();
+  Future<Either<Failure, UserEntity>> getUserData();
+  Future<Either<Failure, bool>> updateLocation(int locationId);
+  Future<Either<Failure,List<History>>> getHistory();
 }

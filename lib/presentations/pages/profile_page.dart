@@ -2,6 +2,7 @@ import 'package:danitor/core/routes/route_names.dart';
 import 'package:danitor/core/themes/color_const.dart';
 import 'package:danitor/core/common/auth_helper.dart';
 import 'package:danitor/presentations/providers/auth_notifier.dart';
+import 'package:danitor/presentations/providers/user_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<UserNotifier>();
     return Column(
       children: [
         Container(
@@ -55,7 +57,7 @@ class ProfilePage extends StatelessWidget {
                           fontSize: 14, color: kWhite, height: 1),
                     ),
                     Text(
-                      'Muh Ikhsan',
+                      provider.userEntity!.name,
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         color: kWhite,
@@ -75,7 +77,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      're@21',
+                      provider.userEntity!.username,
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         color: kWhite,

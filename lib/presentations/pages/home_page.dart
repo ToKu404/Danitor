@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:danitor/core/themes/color_const.dart';
+import 'package:danitor/data/models/histories.dart';
+import 'package:danitor/presentations/providers/auth_notifier.dart';
+import 'package:danitor/presentations/providers/danitor_notifier.dart';
 import 'package:danitor/presentations/providers/select_location_handler.dart';
+import 'package:danitor/presentations/providers/user_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,11 +13,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/routes/route_names.dart';
+import '../providers/detail_provider_notifier.dart';
 import '../providers/get_info_location_notifier.dart';
 import '../providers/target_image_notifier.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int? id;
+  const HomePage({super.key, required this.id});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -21,11 +29,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     Future.microtask(() {
-      Provider.of<SelectLocationHandler>(context, listen: false).initId(1);
-      if (1 != -1) {
+      final id = widget.id ?? -1;
+      Provider.of<SelectLocationHandler>(context, listen: false).initId(id);
+      if (id != -1) {
         Provider.of<GetInfoLocationNotifier>(context, listen: false)
             .getInfoLocation(1);
       }
+      Provider.of<UserNotifier>(context, listen: false).getHistory();
     });
     super.initState();
   }
@@ -61,69 +71,67 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(
                         height: 8,
                       ),
-                      InkWell(
-                        onTap: () => Navigator.pushNamed(
-                            context, DESTINATION_ROUTE_NAME,
-                            arguments: false),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Stack(
-                            children: [
-                              Image.network(
-                                'https://d3p0bla3numw14.cloudfront.net/news-content/img/2021/05/03112735/Tempat-Tinggal-Terbaik-di-Bali.jpg',
-                                height: 180,
-                                width: MediaQuery.of(context).size.width,
-                                fit: BoxFit.cover,
-                              ),
-                              Positioned.fill(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.black,
-                                        Colors.black.withOpacity(.45),
-                                        Colors.transparent
-                                      ],
-                                      begin: Alignment.bottomCenter,
-                                      end: Alignment.topCenter,
+                      Builder(builder: (context) {
+                        final provider = context.watch<SelectLocationHandler>();
+                        return InkWell(
+                          onTap: () => Navigator.pushNamed(
+                              context, DESTINATION_ROUTE_NAME,
+                              arguments: false),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Stack(
+                              children: [
+                                Image.network(
+                                  provider.urlLocation,
+                                  height: 180,
+                                  width: MediaQuery.of(context).size.width,
+                                  fit: BoxFit.cover,
+                                ),
+                                Positioned.fill(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.black,
+                                          Colors.black.withOpacity(.45),
+                                          Colors.transparent
+                                        ],
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                      ),
                                     ),
-                                  ),
-                                  padding: EdgeInsets.all(12),
-                                  child: Align(
-                                    alignment: Alignment.bottomLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.location_on_rounded,
-                                          color: kGreen,
-                                        ),
-                                        SizedBox(
-                                          width: 4,
-                                        ),
-                                        Builder(builder: (context) {
-                                          final provider = context
-                                              .watch<SelectLocationHandler>();
-                                          final name = provider.locationName;
-                                          return Text(
-                                              '${name[0].toUpperCase()}${name.substring(1, name.length)}',
+                                    padding: EdgeInsets.all(12),
+                                    child: Align(
+                                      alignment: Alignment.bottomLeft,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.location_on_rounded,
+                                            color: kGreen,
+                                          ),
+                                          SizedBox(
+                                            width: 4,
+                                          ),
+                                          Text(
+                                              '${provider.locationName[0].toUpperCase()}${provider.locationName.substring(1, provider.locationName.length)}',
                                               style: GoogleFonts.poppins(
                                                 fontSize: 14,
                                                 color: kWhite,
-                                              ));
-                                        })
-                                      ],
+                                              )),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -174,123 +182,166 @@ class _HomePageState extends State<HomePage> {
                   height: 16,
                 ),
                 // Todo : Kondisi jika tidak kosong
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: BuildTitle(
-                        title: 'Riwayat Deteksi',
-                      ),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.height,
-                      height: 140,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 3,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            margin: EdgeInsets.only(right: 8),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Stack(
-                                children: [
-                                  Image.network(
-                                    'https://www.zubludiving.com/images/Mabul-blueringed-octopus-banner.jpg',
-                                    width: 240,
-                                    height: 140,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Container(
-                                    width: 240,
-                                    height: 140,
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                            colors: [
-                                          Colors.black,
-                                          Colors.transparent
-                                        ],
-                                            begin: Alignment.bottomCenter,
-                                            end: Alignment.topCenter)),
-                                  ),
-                                  Positioned(
-                                    bottom: 8,
-                                    left: 8,
-                                    right: 8,
-                                    child: SizedBox(
-                                      width: 224,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Blue Ring Octopus',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              color: kWhite,
+                Builder(builder: (context) {
+                  final provider = context.read<AuthNotifier>();
+                  final providerData = context.read<UserNotifier>();
+                  // final detailState = context.read<DetailProviderNotifier>();
+                  final locProv = context.read<SelectLocationHandler>();
+
+                  if (provider.isLogin && providerData.histories.isNotEmpty) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: BuildTitle(
+                            title: 'Riwayat Deteksi',
+                          ),
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.height,
+                          height: 140,
+                          child: Builder(builder: (context) {
+                            return ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: providerData.histories.length,
+                              itemBuilder: (context, index) {
+                                final History history =
+                                    providerData.histories[index];
+                                // detailState.getDetails(history
+                                //     .detectionResult.objectDetectedClass
+                                //     .toString());
+                                // if (detailState.detectionState !=
+                                //     RequestState.success) {
+                                //   return Center(
+                                //     child: CircularProgressIndicator(),
+                                //   );
+                                // }
+                                // final detail = detailState.listAnimalDetail
+                                //     .where((element) =>
+                                //         element.id ==
+                                //         history
+                                //             .detectionResult.objectDetectedClass
+                                //             .toString())
+                                //     .first;
+
+                                final dataLocation =
+                                    locProv.destionationList[history.location];
+                                return Container(
+                                  margin: EdgeInsets.only(right: 8),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Stack(
+                                      children: [
+                                        Image.memory(
+                                          base64Decode(
+                                            history.image,
+                                          ),
+                                          width: 240,
+                                          height: 140,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        Container(
+                                          width: 240,
+                                          height: 140,
+                                          decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                  colors: [
+                                                Colors.black,
+                                                Colors.transparent
+                                              ],
+                                                  begin: Alignment.bottomCenter,
+                                                  end: Alignment.topCenter)),
+                                        ),
+                                        Positioned(
+                                          bottom: 8,
+                                          left: 8,
+                                          right: 8,
+                                          child: SizedBox(
+                                            width: 224,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Builder(builder: (context) {
+                                                  final List animalName = [
+                                                    'Any Kind of Starfish',
+                                                    'Blue Ring Octopus',
+                                                    'Crown of Thorns'
+                                                  ];
+                                                  return Text(
+                                                    '${animalName[history.detectionResult.objectDetectedClass]}',
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 12,
+                                                      color: kWhite,
+                                                    ),
+                                                  );
+                                                }),
+                                                Text(
+                                                  '${(history.detectionResult.confidence * 100).toStringAsFixed(2)}%',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 12,
+                                                    height: 1.2,
+                                                    color: kGreen,
+                                                  ),
+                                                )
+                                              ],
                                             ),
                                           ),
-                                          Text(
-                                            'Akurasi 90%',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              height: 1.2,
-                                              color: kGreen,
+                                        ),
+                                        Positioned(
+                                          top: 8,
+                                          left: 8,
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: kGreyDark,
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
-                                          )
-                                        ],
-                                      ),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.location_on_rounded,
+                                                  color: kWhite,
+                                                  size: 12,
+                                                ),
+                                                SizedBox(
+                                                  width: 4,
+                                                ),
+                                                Text(
+                                                  '${dataLocation[0].toUpperCase()}${dataLocation.substring(1, dataLocation.length)}',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 12,
+                                                    height: 1.2,
+                                                    color: kWhite,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  Positioned(
-                                    top: 8,
-                                    left: 8,
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: kGreyDark,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.location_on_rounded,
-                                            color: kWhite,
-                                            size: 12,
-                                          ),
-                                          SizedBox(
-                                            width: 4,
-                                          ),
-                                          Text(
-                                            'Denpasar, Bali',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              height: 1.2,
-                                              color: kWhite,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                  ],
-                )
+                                );
+                              },
+                            );
+                          }),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                      ],
+                    );
+                  }
+                  return SizedBox.shrink();
+                })
               ],
             ),
           ))

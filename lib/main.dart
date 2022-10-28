@@ -12,6 +12,7 @@ import 'package:danitor/presentations/pages/wrapper_page.dart';
 import 'package:danitor/presentations/providers/auth_notifier.dart';
 import 'package:danitor/presentations/providers/login_notifier.dart';
 import 'package:danitor/presentations/providers/register_notifier.dart';
+import 'package:danitor/presentations/providers/user_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -67,6 +68,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => di.locator<AuthNotifier>(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => di.locator<UserNotifier>(),
         )
       ],
       child: MaterialApp(

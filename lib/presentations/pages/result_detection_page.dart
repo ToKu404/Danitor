@@ -299,12 +299,15 @@ class _BuildDetailBodyState extends State<BuildDetailBody> {
                     ),
                     Positioned(
                       bottom: 12,
-                      child: BuildDetail(
-                        resultLength: widget.detection.objectDetected.length,
-                        animalDetail: detail,
-                        detection: widget.detection,
-                        // animalDetail: detail,
-                      ),
+                      child: Builder(builder: (context) {
+                        print(widget.detection.objectDetected.length);
+                        return BuildDetail(
+                          resultLength: widget.detection.objectDetected.length,
+                          animalDetail: detail,
+                          detection: widget.detection,
+                          // animalDetail: detail,
+                        );
+                      }),
                     ),
                   ],
                 ),

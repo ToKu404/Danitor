@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:danitor/core/common/exception.dart';
 import 'package:danitor/data/data_sources/danitor_datasource.dart';
+import 'package:danitor/data/models/histories.dart';
 import 'package:danitor/data/models/token_response.dart';
 import 'package:danitor/domain/entities/detail_animals.dart';
 import 'package:danitor/domain/entities/detection.dart';
 import 'package:danitor/domain/entities/location_entity.dart';
+import 'package:danitor/domain/entities/user_entity.dart';
 import 'package:danitor/domain/repositories/danitor_repository.dart';
 import 'package:dartz/dartz.dart';
 
@@ -97,6 +99,42 @@ class DanitorRepositoryImpl implements DanitorRepository {
       return Right(result);
     } on ServerException {
       return const Left(ServerFailure(''));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> getUserData() async {
+    try {
+      final result = await danitorDataSource.getUserData();
+      return Right(result);
+    } on ServerException {
+      return const Left(ServerFailure(''));
+    } on SocketException {
+      return const Left(ConnectionFailure('Failed to connect to the network'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> updateLocation(int locationId) async {
+    try {
+      final result = await danitorDataSource.updateLocation(locationId);
+      return Right(result);
+    } on ServerException {
+      return const Left(ServerFailure(''));
+    } on SocketException {
+      return const Left(ConnectionFailure('Failed to connect to the network'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<History>>> getHistory() async {
+    try {
+      final result = await danitorDataSource.getHistory();
+      return Right(result);
+    } on ServerException {
+      return const Left(ServerFailure(''));
+    } on SocketException {
+      return const Left(ConnectionFailure('Failed to connect to the network'));
     }
   }
 }

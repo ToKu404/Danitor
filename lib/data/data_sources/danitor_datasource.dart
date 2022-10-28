@@ -5,10 +5,13 @@ import 'package:danitor/data/models/detail_animals_response.dart';
 import 'package:danitor/data/models/location_response.dart';
 import 'package:danitor/data/models/token_response.dart';
 import 'package:danitor/core/common/auth_helper.dart';
+import 'package:danitor/data/models/user_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:danitor/data/models/detection_model.dart';
 
 import '../../core/common/exception.dart';
+import '../../domain/entities/user_entity.dart';
+import '../models/histories.dart';
 
 abstract class DanitorDataSource {
   Future<DetectionResponse> getDetectionResult(String image, List<int> filters);
@@ -16,10 +19,11 @@ abstract class DanitorDataSource {
   Future<LocationResponse> getAnimalLocation(String id);
   Future<TokenData> login(String username, String password);
   Future<bool> register(String username, String name, String password);
-  Future<String> getUser(String token);
-  Future<String> getHistory(String token);
   Future<bool> logout();
   Future<bool> isLogin();
+  Future<UserEntity> getUserData();
+  Future<bool> updateLocation(int idLocation);
+  Future<List<History>> getHistory();
 }
 
 class DanitorDatasourceImpl implements DanitorDataSource {
@@ -33,6 +37,11 @@ class DanitorDatasourceImpl implements DanitorDataSource {
   @override
   Future<DetectionResponse> getDetectionResult(
       String image, List<int> filters) async {
+    String token = '';
+    if (await helper.checkUserIdExist()) {
+      token = await helper.getUserId();
+    }
+
     Map data = {
       "image": image,
       "filters": filters,
@@ -43,6 +52,7 @@ class DanitorDatasourceImpl implements DanitorDataSource {
     final response = await client.post(
       Uri.parse('$BASE_URL/detect'),
       headers: {
+        if (token.isNotEmpty) 'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
       body: json.encode(filters.isEmpty ? dataNoFilter : data),
@@ -118,25 +128,20 @@ class DanitorDatasourceImpl implements DanitorDataSource {
   }
 
   @override
-  Future<String> getUser(String token) async {
-    final response = await client.get(Uri.parse('$BASE_URL/user'), headers: {
-      'Authorization': 'Bearer $token',
-    });
-    if (response.statusCode == 201) {
-      return response.body;
-    } else {
-      throw ServerException();
-    }
-  }
+  Future<List<History>> getHistory() async {
+    final token = await helper.getUserId();
 
-  @override
-  Future<String> getHistory(String token) async {
     final response =
         await client.get(Uri.parse('$BASE_URL/histories'), headers: {
       'Authorization': 'Bearer $token',
     });
+    print(response.statusCode);
+    print(response.body);
+
     if (response.statusCode == 200) {
-      return response.body;
+      return HistoriesResults.fromJson(json.decode(response.body))
+          .result
+          .history;
     } else {
       throw ServerException();
     }
@@ -151,5 +156,42 @@ class DanitorDatasourceImpl implements DanitorDataSource {
   Future<bool> logout() async {
     helper.removeUserId();
     return true;
+  }
+
+  @override
+  Future<UserEntity> getUserData() async {
+    final token = await helper.getUserId();
+    final response = await client.get(Uri.parse('$BASE_URL/user'), headers: {
+      'Authorization': 'Bearer $token',
+    });
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode == 200) {
+      return UserResponse.fromJson(json.decode(response.body))
+          .result
+          .toEntity();
+    } else {
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<bool> updateLocation(int idLocation) async {
+    final token = await helper.getUserId();
+    final map = {
+      'location_id': idLocation,
+    };
+    final response = await client.post(
+      Uri.parse('$BASE_URL/update-location'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode(map),
+    );
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw ServerException();
+    }
   }
 }

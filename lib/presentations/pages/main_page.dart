@@ -5,6 +5,7 @@ import 'package:danitor/presentations/pages/home_page.dart';
 import 'package:danitor/presentations/pages/profile_page.dart';
 import 'package:danitor/presentations/pages/sharing_page.dart';
 import 'package:danitor/presentations/providers/auth_notifier.dart';
+import 'package:danitor/presentations/providers/user_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,23 +19,41 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final provider = context.read<AuthNotifier>();
+    if (provider.isLogin) {
+      context.read<UserNotifier>()..getUserData();
+    }
+  }
+
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<AuthNotifier>();
-
-    final List<Widget> _pages = [
-      HomePage(),
-      provider.isAnonymous ? AnonymousPage() : SharingPage(),
-      provider.isAnonymous ? AnonymousPage() : EmergencyPage(),
-      provider.isAnonymous ? AnonymousPage() : ProfilePage(),
-    ];
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: _pages.elementAt(_selectedIndex),
+        child: Builder(builder: (context) {
+          final provider = context.watch<AuthNotifier>();
+          final dataUser = context.watch<UserNotifier>();
+
+          if (dataUser.userEntity == null) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          final List<Widget> _pages = [
+            HomePage(
+              id: dataUser.userEntity!.location,
+            ),
+            // provider.isAnonymous ? AnonymousPage() : SharingPage(),
+            provider.isAnonymous ? AnonymousPage() : EmergencyPage(),
+            provider.isAnonymous ? AnonymousPage() : ProfilePage(),
+          ];
+          return _pages.elementAt(_selectedIndex);
+        }),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -52,17 +71,17 @@ class _MainPageState extends State<MainPage> {
               color: kGreyDark,
             ),
           ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/icons/gallery_u.svg',
-              color: kGreyDark,
-            ),
-            label: 'Sosial',
-            activeIcon: SvgPicture.asset(
-              'assets/icons/gallery_a.svg',
-              color: kGreyDark,
-            ),
-          ),
+          // BottomNavigationBarItem(
+          //   icon: SvgPicture.asset(
+          //     'assets/icons/gallery_u.svg',
+          //     color: kGreyDark,
+          //   ),
+          //   label: 'Sosial',
+          //   activeIcon: SvgPicture.asset(
+          //     'assets/icons/gallery_a.svg',
+          //     color: kGreyDark,
+          //   ),
+          // ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
               'assets/icons/emergency_u.svg',
@@ -96,6 +115,7 @@ class _MainPageState extends State<MainPage> {
           });
         },
       ),
+    
     );
   }
 }

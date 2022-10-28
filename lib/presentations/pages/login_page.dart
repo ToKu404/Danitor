@@ -200,8 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                             provider.setAnonymous(true);
                             Navigator.pushReplacementNamed(
                               context,
-                              DESTINATION_ROUTE_NAME,
-                              arguments: true,
+                              MAIN_ROUTE_NAME,
                             );
                           },
                           child: Container(
