@@ -9,3 +9,6 @@ const FULL_SCREEN_IMAGE_ROUTE_NAME = 'full-screen-image';
 const RESULT_DETECTION_ROUTE_NAME = 'result-detection';
 const WRAPPER_ROUTE_NAME = 'wrapper';
 const ANIMAL_DETAIL_ROUTE_NAME = 'animal_detail';
+const PROFILE_ROUTE_NAME = 'profile';
+const EMERGENCY_ROUTE_NAME = 'emergency';
+const ANONYMOUS_ROUTE_NAME = 'anonym';

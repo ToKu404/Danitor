@@ -37,144 +37,99 @@ class _MainPageState extends State<MainPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Builder(builder: (context) {
-          final provider = context.watch<AuthNotifier>();
           final dataUser = context.watch<UserNotifier>();
+          final provider = context.read<AuthNotifier>();
 
-          if (dataUser.userEntity == null) {
+          if (dataUser.userEntity == null && !provider.isAnonymous) {
             return Center(child: CircularProgressIndicator());
           }
 
-          final List<Widget> _pages = [
-            HomePage(
-              id: dataUser.userEntity!.location,
-            ),
-            // provider.isAnonymous ? AnonymousPage() : SharingPage(),
-            provider.isAnonymous ? AnonymousPage() : EmergencyPage(),
-            provider.isAnonymous ? AnonymousPage() : ProfilePage(),
-          ];
-          return _pages.elementAt(_selectedIndex);
+          // final List<Widget> _pages = [
+          //   HomePage(
+          //     id: dataUser.userEntity!.location,
+          //   ),
+          //   // provider.isAnonymous ? AnonymousPage() : SharingPage(),
+          //   provider.isAnonymous ? AnonymousPage() : EmergencyPage(),
+          //   provider.isAnonymous ? AnonymousPage() : ProfilePage(),
+          // ];
+          return HomePage(
+            id: provider.isAnonymous ? null : dataUser.userEntity!.location,
+          );
         }),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: [
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/icons/home_u.svg',
-              color: kGreyDark,
-            ),
-            label: 'Home',
-            activeIcon: SvgPicture.asset(
-              'assets/icons/home_a.svg',
-              color: kGreyDark,
-            ),
-          ),
-          // BottomNavigationBarItem(
-          //   icon: SvgPicture.asset(
-          //     'assets/icons/gallery_u.svg',
-          //     color: kGreyDark,
-          //   ),
-          //   label: 'Sosial',
-          //   activeIcon: SvgPicture.asset(
-          //     'assets/icons/gallery_a.svg',
-          //     color: kGreyDark,
-          //   ),
-          // ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/icons/emergency_u.svg',
-              color: kGreyDark,
-            ),
-            label: 'Bantuan',
-            activeIcon: SvgPicture.asset(
-              'assets/icons/emergency_a.svg',
-              color: kGreyDark,
-            ),
-          ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/icons/user_u.svg',
-              color: kGreyDark,
-            ),
-            label: 'User',
-            activeIcon: SvgPicture.asset(
-              'assets/icons/user_a.svg',
-              color: kGreyDark,
-            ),
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        // selectedItemColor: kGreyDark,
-        elevation: 1,
-        // unselectedItemColor: kGreySoft,
-        onTap: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+      // bottomNavigationBar: BottomNavigationBar(
+      //   type: BottomNavigationBarType.fixed,
+      //   showSelectedLabels: false,
+      //   showUnselectedLabels: false,
+      //   items: [
+      //     BottomNavigationBarItem(
+      //       icon: SvgPicture.asset(
+      //         'assets/icons/home_u.svg',
+      //         color: kGreyDark,
+      //       ),
+      //       label: 'Home',
+      //       activeIcon: SvgPicture.asset(
+      //         'assets/icons/home_a.svg',
+      //         color: kGreyDark,
+      //       ),
+      //     ),
+      //     // BottomNavigationBarItem(
+      //     //   icon: SvgPicture.asset(
+      //     //     'assets/icons/gallery_u.svg',
+      //     //     color: kGreyDark,
+      //     //   ),
+      //     //   label: 'Sosial',
+      //     //   activeIcon: SvgPicture.asset(
+      //     //     'assets/icons/gallery_a.svg',
+      //     //     color: kGreyDark,
+      //     //   ),
+      //     // ),
+      //     BottomNavigationBarItem(
+      //       icon: SvgPicture.asset(
+      //         'assets/icons/emergency_u.svg',
+      //         color: kGreyDark,
+      //       ),
+      //       label: 'Bantuan',
+      //       activeIcon: SvgPicture.asset(
+      //         'assets/icons/emergency_a.svg',
+      //         color: kGreyDark,
+      //       ),
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: SvgPicture.asset(
+      //         'assets/icons/user_u.svg',
+      //         color: kGreyDark,
+      //       ),
+      //       label: 'User',
+      //       activeIcon: SvgPicture.asset(
+      //         'assets/icons/user_a.svg',
+      //         color: kGreyDark,
+      //       ),
+      //     ),
+      //   ],
+      //   currentIndex: _selectedIndex,
+      //   // selectedItemColor: kGreyDark,
+      //   elevation: 1,
+      //   // unselectedItemColor: kGreySoft,
+      //   onTap: (int index) {
+      //     setState(() {
+      //       _selectedIndex = index;
+      //     });
+      //   },
+      // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final provider = context.read<AuthNotifier>();
+          if (provider.isLogin) {
+            Navigator.pushNamed(context, EMERGENCY_ROUTE_NAME);
+          } else {
+            Navigator.pushNamed(context, ANONYMOUS_ROUTE_NAME);
+          }
         },
-      ),
-    
-    );
-  }
-}
-
-class AnonymousPage extends StatelessWidget {
-  const AnonymousPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-                height: 100,
-                width: 100,
-                child: SvgPicture.asset('assets/empty.svg')),
-            SizedBox(
-              height: 16,
-            ),
-            Text(
-              'Fitur Tidak Tersedia',
-              style: GoogleFonts.poppins(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: kGreyDark),
-            ),
-            Text(
-              'Harap login terlebih dahulu',
-              style: GoogleFonts.poppins(fontSize: 14, color: kGreyDark),
-            ),
-            SizedBox(
-              height: 24,
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: kGreen,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12))),
-              onPressed: () async {
-                final provider = context.read<AuthNotifier>();
-                provider.setAnonymous(false);
-                Navigator.pushNamedAndRemoveUntil(
-                    context, WRAPPER_ROUTE_NAME, (route) => false);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                width: double.infinity,
-                alignment: Alignment.center,
-                child: Text(
-                  'Masuk',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-          ],
+        backgroundColor: kWarning,
+        child: SvgPicture.asset(
+          'assets/icons/emergency_a.svg',
+          color: kWhite,
         ),
       ),
     );

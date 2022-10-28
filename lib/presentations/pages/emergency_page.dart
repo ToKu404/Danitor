@@ -9,34 +9,51 @@ class EmergencyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Center(
+    return Scaffold(
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              'Butuh Bantuan?',
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                height: 1.2,
-                fontWeight: FontWeight.bold,
-                color: kGreyDark,
+            Container(
+              height: 65,
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.close)),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Butuh Bantuan?',
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          height: 1.2,
+                          fontWeight: FontWeight.bold,
+                          color: kGreyDark,
+                        ),
+                      ),
+                      Text(
+                        'Geser tombol panggilan darurat dibawah',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          height: 1.2,
+                          color: kGreyDark,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 100,
+                      ),
+                      EmergencySwipeButton(),
+                    ],
+                  ),
+                ),
               ),
             ),
-            Text(
-              'Geser tombol panggilan darurat dibawah',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                height: 1.2,
-                color: kGreyDark,
-              ),
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            EmergencySwipeButton(),
           ],
         ),
       ),

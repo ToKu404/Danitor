@@ -2,8 +2,11 @@ import 'package:danitor/core/routes/route_names.dart';
 import 'package:danitor/core/common/observer.dart';
 import 'package:danitor/domain/entities/animal_detail.dart';
 import 'package:danitor/presentations/pages/animal_detail_page.dart';
+import 'package:danitor/presentations/pages/anonymous_page.dart';
+import 'package:danitor/presentations/pages/emergency_page.dart';
 import 'package:danitor/presentations/pages/main_page.dart';
 import 'package:danitor/presentations/pages/login_page.dart';
+import 'package:danitor/presentations/pages/profile_page.dart';
 import 'package:danitor/presentations/pages/register_page.dart';
 import 'package:danitor/presentations/pages/result_detection_page.dart';
 import 'package:danitor/presentations/pages/select_destionation_page.dart';
@@ -102,6 +105,14 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (context) => WrapperPage(),
               );
+            case PROFILE_ROUTE_NAME:
+              return MaterialPageRoute(
+                builder: (context) => ProfilePage(),
+              );
+            case EMERGENCY_ROUTE_NAME:
+              return MaterialPageRoute(
+                builder: (context) => EmergencyPage(),
+              );
             case FULL_SCREEN_IMAGE_ROUTE_NAME:
               return MaterialPageRoute(
                   builder: (context) => const FullScreenImagePage());
@@ -109,6 +120,10 @@ class MyApp extends StatelessWidget {
               final helper = settings.arguments as HelperSection;
               return MaterialPageRoute(
                 builder: (context) => ResultDetectionPage(helper: helper),
+              );
+            case ANONYMOUS_ROUTE_NAME:
+              return MaterialPageRoute(
+                builder: (context) => AnonymousPage(),
               );
             case ANIMAL_DETAIL_ROUTE_NAME:
               final animalDetail = settings.arguments as AnimalDetail;
