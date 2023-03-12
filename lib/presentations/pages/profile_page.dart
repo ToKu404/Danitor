@@ -14,108 +14,128 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.read<UserNotifier>();
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: kWhite,
-            border: Border(
-              bottom: BorderSide(
-                width: 1,
-                color: Color(0xFFDFDFDF),
-              ),
-            ),
-          ),
-          height: 50,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'Profil Pengguna',
-            style: GoogleFonts.poppins(
-                fontSize: 18, color: kGreen, fontWeight: FontWeight.w700),
-          ),
-        ),
-        Expanded(
-            child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: kGreyDark,
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Nama',
-                      style: GoogleFonts.poppins(
-                          fontSize: 14, color: kWhite, height: 1),
-                    ),
-                    Text(
-                      provider.userEntity!.name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: kWhite,
-                        fontWeight: FontWeight.bold,
-                        height: 1.5,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 16,
-                    ),
-                    Text(
-                      'Email',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: kWhite,
-                        height: 1,
-                      ),
-                    ),
-                    Text(
-                      provider.userEntity!.username,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: kWhite,
-                        fontWeight: FontWeight.bold,
-                        height: 1.5,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 24,
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: kGreen,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12))),
-                      onPressed: () async {
-                        final provider = context.read<AuthNotifier>();
-                        provider.logout();
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Keluar',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                          ),
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: kWhite,
+                      border: Border(
+                        bottom: BorderSide(
+                          width: 1,
+                          color: Color(0xFFDFDFDF),
                         ),
                       ),
                     ),
-                  ],
+                    height: 50,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Profil Pengguna',
+                      style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          color: kGreen,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ),
                 ),
+              ],
+            ),
+            Expanded(
+                child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 24),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: kGreyDark,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Nama',
+                          style: GoogleFonts.poppins(
+                              fontSize: 14, color: kWhite, height: 1),
+                        ),
+                        Text(
+                          provider.userEntity!.name,
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            color: kWhite,
+                            fontWeight: FontWeight.bold,
+                            height: 1.5,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 16,
+                        ),
+                        Text(
+                          'Email',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: kWhite,
+                            height: 1,
+                          ),
+                        ),
+                        Text(
+                          provider.userEntity!.username,
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            color: kWhite,
+                            fontWeight: FontWeight.bold,
+                            height: 1.5,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 24,
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: kGreen,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12))),
+                          onPressed: () async {
+                            final provider = context.read<AuthNotifier>();
+                            provider.logout();
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, WRAPPER_ROUTE_NAME, (route) => false);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            width: double.infinity,
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Keluar',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        )),
-      ],
+            )),
+          ],
+        ),
+      ),
     );
   }
 }

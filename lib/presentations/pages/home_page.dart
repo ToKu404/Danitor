@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:danitor/core/themes/color_const.dart';
 import 'package:danitor/data/models/histories.dart';
+import 'package:danitor/presentations/pages/profile_page.dart';
 import 'package:danitor/presentations/providers/auth_notifier.dart';
 import 'package:danitor/presentations/providers/danitor_notifier.dart';
 import 'package:danitor/presentations/providers/select_location_handler.dart';
@@ -35,7 +36,10 @@ class _HomePageState extends State<HomePage> {
         Provider.of<GetInfoLocationNotifier>(context, listen: false)
             .getInfoLocation(1);
       }
-      Provider.of<UserNotifier>(context, listen: false).getHistory();
+      final provider = context.read<AuthNotifier>();
+      if (provider.isLogin) {
+        Provider.of<UserNotifier>(context, listen: false).getHistory();
+      }
     });
     super.initState();
   }
@@ -482,19 +486,29 @@ class AppBarHome extends StatelessWidget {
               )
             ],
           ),
-          // InkWell(
-          //   onTap: () {},
-          //   child: Container(
-          //     height: 30,
-          //     width: 30,
-          //     padding: EdgeInsets.all(6),
-          //     decoration: BoxDecoration(
-          //       color: kGreen,
-          //       shape: BoxShape.circle,
-          //     ),
-          //     child: SvgPicture.asset('assets/icons/notif.svg'),
-          //   ),
-          // )
+          InkWell(
+            onTap: () async {
+              final provider = context.read<AuthNotifier>();
+              if (provider.isLogin) {
+                Navigator.pushNamed(context, PROFILE_ROUTE_NAME);
+              } else {
+                Navigator.pushNamed(context, ANONYMOUS_ROUTE_NAME);
+              }
+            },
+            child: Container(
+              height: 30,
+              width: 30,
+              padding: EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: kGreen,
+                shape: BoxShape.circle,
+              ),
+              child: SvgPicture.asset(
+                'assets/icons/user_a.svg',
+                color: kWhite,
+              ),
+            ),
+          )
         ],
       ),
     );
