@@ -1,7 +1,7 @@
 # Danitor
+
 Project Compest AIC
 
-![img_2](https://raw.githubusercontent.com/ToKu404/danitor/main/ss_2.png){height="300px"}
-![img_1](https://raw.githubusercontent.com/ToKu404/danitor/main/ss_1.png)
+<img src="https://raw.githubusercontent.com/ToKu404/danitor/main/ss_2.png" alt="img2" height="400">
 
-
+![img_1](https://raw.githubusercontent.com/ToKu404/danitor/main/ss_1.png){height="100"}
